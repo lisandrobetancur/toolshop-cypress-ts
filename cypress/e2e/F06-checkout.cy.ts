@@ -73,24 +73,28 @@ describe('F06 Checkout como cliente autenticado', { tags: ['@F06'] }, () => {
     });
   });
 
-  it('bloquea la confirmación sin medio de pago o con tarjeta inválida', { tags: ['@regression'] }, () => {
-    const [first] = products as [Product];
+  it(
+    'bloquea la confirmación sin medio de pago o con tarjeta inválida',
+    { tags: ['@regression'] },
+    () => {
+      const [first] = products as [Product];
 
-    createCart([{ product: first, quantity: 1 }]).then((cart) => {
-      cy.visitWithCart('/checkout', cart);
-    });
-    checkoutPage.proceedToAddress();
-    checkoutPage.address.proceed();
+      createCart([{ product: first, quantity: 1 }]).then((cart) => {
+        cy.visitWithCart('/checkout', cart);
+      });
+      checkoutPage.proceedToAddress();
+      checkoutPage.address.proceed();
 
-    cy.getByTest('finish').should('be.disabled');
-    cy.getByTest('payment-method').select('credit-card');
-    cy.getByTest('credit_card_number').type('1234');
-    cy.getByTest('expiration_date').type('01/2000');
-    cy.getByTest('cvv').type('1');
-    cy.getByTest('card_holder_name').type('QA');
-    cy.contains('Invalid card number format.').should('be.visible');
-    cy.contains('Expiration date must be in the future.').should('be.visible');
-    cy.contains('CVV must be 3 or 4 digits.').should('be.visible');
-    cy.getByTest('finish').should('be.disabled');
-  });
+      cy.getByTest('finish').should('be.disabled');
+      cy.getByTest('payment-method').select('credit-card');
+      cy.getByTest('credit_card_number').type('1234');
+      cy.getByTest('expiration_date').type('01/2000');
+      cy.getByTest('cvv').type('1');
+      cy.getByTest('card_holder_name').type('QA');
+      cy.contains('Invalid card number format.').should('be.visible');
+      cy.contains('Expiration date must be in the future.').should('be.visible');
+      cy.contains('CVV must be 3 or 4 digits.').should('be.visible');
+      cy.getByTest('finish').should('be.disabled');
+    },
+  );
 });
