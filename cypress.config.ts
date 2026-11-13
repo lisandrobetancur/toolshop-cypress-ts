@@ -103,8 +103,9 @@ export default defineConfig({
         }
       });
 
-      cypressSplit(on, config);
+      // Primero se filtran los specs por etiqueta y luego se reparten entre los shards de CI.
       grepPlugin(config);
+      cypressSplit(on, config);
       return config;
     },
   },
