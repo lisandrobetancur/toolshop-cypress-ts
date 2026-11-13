@@ -1,0 +1,95 @@
+name: E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      grepTags:
+        description: 'Etiquetas a ejecutar (p. ej. @smoke o @F06). Vacío = toda la suite.'
+        required: false
+        default: ''
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  BASE_URL: ${{ vars.BASE_URL || 'https://practicesoftwaretesting.com' }}
+  API_URL: ${{ vars.API_URL || 'https://api.practicesoftwaretesting.com' }}
+
+jobs:
+  quality:
+    name: Tipos, lint y formato
+    runs-on: ubuntu-latest
+    env:
+      # La verificación estática no necesita el binario de Cypress ni navegadores.
+      CYPRESS_INSTALL_BINARY: '0'
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+
+  e2e:
+    name: ${{ matrix.browser }} (shard ${{ matrix.shard }}/3)
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # WebKit es experimental en Cypress: su resultado se informa pero no bloquea el pipeline.
+    continue-on-error: ${{ matrix.browser == 'webkit' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, webkit]
+        shard: [0, 1, 2]
+    env:
+      CI: 'true'
+      SPLIT: '3'
+      SPLIT_INDEX: ${{ matrix.shard }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # Instala dependencias con caché de npm y del binario de Cypress, sin ejecutar aún.
+      - name: Instalar dependencias (con caché)
+        uses: cypress-io/github-action@v7.4.9
+        with:
+          runTests: false
+
+      - name: Instalar WebKit y sus dependencias del sistema
+        if: matrix.browser == 'webkit'
+        run: npx playwright-webkit install --with-deps webkit
+
+      - name: Ejecutar pruebas
+        uses: cypress-io/github-action@v7.4.9
+        with:
+          install: false
+          browser: ${{ matrix.browser }}
+          expose: grepTags=${{ github.event.inputs.grepTags }},grepFilterSpecs=true,grepOmitFiltered=true
+
+      - name: Publicar reporte HTML
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: reporte-${{ matrix.browser }}-shard-${{ matrix.shard }}
+          path: |
+            cypress/reports
+            cypress/screenshots
+            cypress/videos
+          if-no-files-found: ignore
+          retention-days: 14
