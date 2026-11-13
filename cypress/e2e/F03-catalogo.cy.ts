@@ -1,4 +1,4 @@
-import { getBrands, getCategoryTree, listProducts } from '../support/api/products';
+import { getBrands, getCategoryTree, listProducts, searchProducts } from '../support/api/products';
 import { parseMoney } from '../support/data/money';
 import { catalogPage } from '../support/pages/catalog.page';
 
@@ -12,7 +12,7 @@ describe('F03 Catálogo', { tags: ['@F03'] }, () => {
   it('busca productos por texto', { tags: ['@smoke'] }, () => {
     const query = 'pliers';
 
-    listProducts({ q: query }).then((expected) => {
+    searchProducts(query).then((expected) => {
       expect(expected.total, 'coincidencias según la API').to.be.greaterThan(0);
 
       catalogPage.search(query);

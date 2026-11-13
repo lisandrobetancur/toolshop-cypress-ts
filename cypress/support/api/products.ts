@@ -55,6 +55,18 @@ export function listProducts(query: ProductQuery = {}): Cypress.Chainable<Pagina
   }).then(({ body }) => body);
 }
 
+/**
+ * Búsqueda por texto tal como la hace la UI (`/products/search`): sin filtros de precio ni de
+ * alquiler, a diferencia del listado.
+ */
+export function searchProducts(q: string): Cypress.Chainable<Paginated<Product>> {
+  return apiRequest<Paginated<Product>>({
+    method: 'GET',
+    path: '/products/search',
+    qs: { q },
+  }).then(({ body }) => body);
+}
+
 export function getProduct(id: string): Cypress.Chainable<Product> {
   return apiRequest<Product>({ method: 'GET', path: `/products/${id}` }).then(({ body }) => body);
 }
