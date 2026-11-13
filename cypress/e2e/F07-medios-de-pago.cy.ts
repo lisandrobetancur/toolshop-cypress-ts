@@ -8,7 +8,8 @@ import { checkoutPage } from '../support/pages/checkout.page';
 // F06 ya cubre tarjeta de crédito; aquí se parametrizan los demás medios de pago.
 const cases = buildPaymentCases().filter(({ method }) => method !== 'credit-card');
 
-describe('F07 Checkout con distintos medios de pago', { tags: ['@F07'] }, () => {
+// Etiquetas literales: @cypress/grep las lee de forma estática al prefiltrar specs.
+describe('F07 Checkout con distintos medios de pago', { tags: ['@F07', '@regression'] }, () => {
   let customer: Customer;
 
   beforeEach(() => {
@@ -25,21 +26,17 @@ describe('F07 Checkout con distintos medios de pago', { tags: ['@F07'] }, () => 
   });
 
   cases.forEach((payment) => {
-    it(
-      `confirma el pedido pagando con ${payment.label}`,
-      { tags: payment.method === 'bank-transfer' ? ['@smoke'] : ['@regression'] },
-      () => {
-        checkoutPage.proceedToAddress();
-        checkoutPage.address.proceed();
-        checkoutPage.fillPayment(payment);
-        checkoutPage.confirm();
+    it(`confirma el pedido pagando con ${payment.label}`, () => {
+      checkoutPage.proceedToAddress();
+      checkoutPage.address.proceed();
+      checkoutPage.fillPayment(payment);
+      checkoutPage.confirm();
 
-        checkoutPage.invoiceNumber().then((invoiceNumber) => {
-          findInvoiceByNumber(invoiceNumber, customer.token)
-            .its('payment.payment_method')
-            .should('eq', payment.method);
-        });
-      },
-    );
+      checkoutPage.invoiceNumber().then((invoiceNumber) => {
+        findInvoiceByNumber(invoiceNumber, customer.token)
+          .its('payment.payment_method')
+          .should('eq', payment.method);
+      });
+    });
   });
 });
