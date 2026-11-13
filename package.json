@@ -1,0 +1,52 @@
+{
+  "name": "toolshop-cypress-ts",
+  "version": "1.0.0",
+  "description": "Suite E2E de Toolshop (Practice Software Testing) con Cypress y TypeScript",
+  "scripts": {
+    "cy:open": "cypress open --e2e",
+    "cy:run": "cypress run --browser ${BROWSER:-chrome}",
+    "test": "npm run cy:run",
+    "test:smoke": "npm run cy:run -- --expose grepTags=@smoke",
+    "test:regression": "npm run cy:run -- --expose grepTags=@regression",
+    "test:chrome": "cypress run --browser chrome",
+    "test:firefox": "cypress run --browser firefox",
+    "test:webkit": "cypress run --browser webkit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run lint && npm run format:check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lisandrobetancur/toolshop-cypress-ts.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/lisandrobetancur/toolshop-cypress-ts/issues"
+  },
+  "homepage": "https://github.com/lisandrobetancur/toolshop-cypress-ts#readme",
+  "devDependencies": {
+    "@cypress/grep": "7.0.0",
+    "@eslint/js": "10.0.1",
+    "@faker-js/faker": "10.6.0",
+    "@types/node": "26.6.6",
+    "cypress": "16.3.0",
+    "cypress-mochawesome-reporter": "5.0.0",
+    "cypress-split": "1.25.0",
+    "dotenv": "18.0.10",
+    "eslint": "10.14.0",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-cypress": "7.0.4",
+    "globals": "17.14.0",
+    "prettier": "3.10.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.2"
+  },
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0 || >=26.0.0"
+  }
+}
