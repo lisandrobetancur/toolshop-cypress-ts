@@ -1,4 +1,5 @@
 import type { SeededCart } from './api/carts';
+import { apiRequest } from './api/client';
 import { login } from './api/users';
 import type { Credentials } from './data/users';
 
@@ -44,9 +45,14 @@ Cypress.Commands.add('loginAs', (credentials) => {
       });
     },
     {
+      // El token de Toolshop expira a los pocos minutos: se valida contra la API y, si ya no
+      // es válido, cy.session vuelve a ejecutar el login.
       validate() {
         cy.window().then((win) => {
-          expect(win.localStorage.getItem(TOKEN_KEY), 'token de sesión').to.be.a('string');
+          const token = win.localStorage.getItem(TOKEN_KEY) ?? '';
+          apiRequest({ method: 'GET', path: '/users/me', token, failOnStatusCode: false })
+            .its('status')
+            .should('eq', 200);
         });
       },
     },
