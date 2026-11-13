@@ -1,4 +1,5 @@
 import type { SeededCart } from './api/carts';
+import { getAdminCredentials } from './api/admin';
 import { apiRequest } from './api/client';
 import { login } from './api/users';
 import type { Credentials } from './data/users';
@@ -60,13 +61,8 @@ Cypress.Commands.add('loginAs', (credentials) => {
 });
 
 Cypress.Commands.add('loginAsAdmin', () => {
-  cy.env(['ADMIN_EMAIL', 'ADMIN_PASSWORD']).then((env) => {
-    const email: unknown = env.ADMIN_EMAIL;
-    const password: unknown = env.ADMIN_PASSWORD;
-    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
-      throw new Error('Faltan ADMIN_EMAIL y ADMIN_PASSWORD: defínelas en .env (ver .env.example).');
-    }
-    cy.loginAs({ email, password });
+  getAdminCredentials().then((credentials) => {
+    cy.loginAs(credentials);
   });
 });
 
