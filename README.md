@@ -44,8 +44,14 @@ npm run check                    # tipos + lint + formato
 ```
 
 Cada prueba lleva una etiqueta de flujo (`@F01`…`@F12`) y una de tipo (`@smoke` o
-`@regression`). El reporte HTML queda en `cypress/reports/index.html`, con capturas y video
-embebidos solo para las pruebas que fallan.
+`@regression`). El reporte HTML queda en `cypress/reports/index.html` como un único archivo
+autocontenido (unos 8,5 MB con la suite completa):
+
+- **Capturas en todas las pruebas.** Las que pasan llevan una captura del estado final de la
+  vista ("estado final"), tomada en un `afterEach` de `cypress/support/e2e.ts`. Las que fallan
+  llevan la captura automática del momento del fallo ("Failed screenshot").
+- **Video solo en fallos.** Se graba cada spec, pero el video se borra si el spec no tuvo
+  intentos fallidos.
 
 ## Estructura
 
@@ -168,8 +174,8 @@ Firefox: sin verificar localmente (no está instalado en la máquina de desarrol
 ## Limitaciones de Cypress frente a los flujos
 
 - **Trazas.** Cypress no genera trazas locales como Playwright; su equivalente (Test Replay)
-  requiere Cypress Cloud. El reporte incluye capturas y video solo de las pruebas fallidas: el
-  video de los specs en verde se borra en `after:spec`.
+  requiere Cypress Cloud. El reporte incluye una captura de cada prueba, y video solo de los
+  specs con fallos (el resto se borra en `after:spec`).
 - **WebKit es experimental** (`experimentalWebKitSupport`). Pasa la suite completa, pero en CI se
   marca como no bloqueante. Safari real no está soportado.
 - **Paralelismo por spec.** Cypress no paraleliza dentro de un proceso. En CI se reparten los
