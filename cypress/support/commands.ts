@@ -1,3 +1,4 @@
+import type { SeededCart } from './api/carts';
 import { login } from './api/users';
 import type { Credentials } from './data/users';
 
@@ -17,6 +18,13 @@ declare global {
       loginAs(credentials: Credentials): Chainable<void>;
       /** Igual que `loginAs`, con la cuenta de administrador definida en variables de entorno. */
       loginAsAdmin(): Chainable<void>;
+      /**
+       * Visita una ruta con un carrito creado por API ya asociado a la pestaña, igual que si el
+       * usuario lo hubiera llenado desde la UI.
+       */
+      visitWithCart(path: string, cart: SeededCart): Chainable<void>;
+      /** Texto visible de cada elemento del sujeto, sin espacios sobrantes. */
+      texts(): Chainable<string[]>;
     }
   }
 }
@@ -55,3 +63,18 @@ Cypress.Commands.add('loginAsAdmin', () => {
     cy.loginAs({ email, password });
   });
 });
+
+Cypress.Commands.add('visitWithCart', (path, cart) => {
+  const quantity = cart.lines.reduce((total, line) => total + line.quantity, 0);
+  cy.visit(path, {
+    onBeforeLoad(win) {
+      win.sessionStorage.setItem('cart_id', cart.id);
+      win.sessionStorage.setItem('cart_quantity', JSON.stringify(quantity));
+    },
+  });
+});
+
+Cypress.Commands.addQuery(
+  'texts',
+  () => (subject: JQuery) => subject.toArray().map((element) => element.innerText.trim()),
+);
